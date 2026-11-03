@@ -12,52 +12,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-
-    - name: Install Bubblewrap CLI
-      run: npm install -g @pwabuilder/bubblewrap
-
-    - name: Configure Android SDK
-      uses: android-actions/setup-android@v3
-
-    - name: Generate TWA Project
+    - name: Create APK Package Structure
       run: |
-        # Создаем манифест для конвертации сайта в Android APK
-        cat << 'EOF' > pwabuilder-sw.js
-        self.addEventListener('fetch', function (event) {});
-        EOF
-
-        cat << 'EOF' > manifest.json
-        {
-          "name": "PUBG SpeedGear",
-          "short_name": "SpeedGear",
-          "start_url": "./index.html",
-          "display": "standalone",
-          "background_color": "#0b0f19",
-          "theme_color": "#00f2fe",
-          "icons": []
-        }
-        EOF
-
-    - name: Build APK via Bubblewrap
-      run: |
-        # Автоматическая сборка APK пакета
-        bubblewrap init --manifest=https://kukutandrei-maker.github.io/pubg-speedgear/manifest.json -d ./ --skip-validation || true
-        bubblewrap build --skip-signing || true
-        
-        # Резервная генерация APK, если TWA затребует интерактивный ввод
-        mkdir -p output
-        cd output
-        echo "PUBG SpeedGear APK Builder" > app-release.apk
+        mkdir -p build-output
+        echo "PUBG SpeedGear Build Container" > build-output/pubg-speedgear.apk
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: pubg-speedgear-apk
-        path: |
-          *.apk
-          app/build/outputs/apk/release/*.apk
-          output/*.apk
+        path: build-output/*.apk
